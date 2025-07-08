@@ -1,23 +1,34 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <Module>
 	<Name value="C# Scripting" />
-	<Id value="$modulename$" />
-	<Version value="v$version$" />
+	<Id value="CSharpScripting" />
+	<Version value="v1.4.0" />
+	<ModuleType value="Community" />
 	<Official value="false" />
 	<DefaultModule value="false" />
 	<SingleplayerModule value="true" />
 	<MultiplayerModule value="false" />
-	<DependedModules />
+	<DependedModules>
+		<DependedModule Id="Native" DependentVersion="v1.2.0" />
+		<DependedModule Id="SandBoxCore" DependentVersion="v1.2.0" />
+		<DependedModule Id="Sandbox" DependentVersion="v1.2.0" />
+		<DependedModule Id="StoryMode" DependentVersion="v1.2.0" />
+	</DependedModules>
+	<DependedModuleMetadatas>
+		<DependedModuleMetadata id="Native" order="LoadBeforeThis" version="v1.2.0.*" />
+		<DependedModuleMetadata id="SandBoxCore" order="LoadBeforeThis" version="v1.2.0.*" />
+		<DependedModuleMetadata id="Sandbox" order="LoadBeforeThis" version="v1.2.0.*" />
+		<DependedModuleMetadata id="StoryMode" order="LoadBeforeThis" version="v1.2.0.*" />
+	</DependedModuleMetadatas>
 	<SubModules>
 		<SubModule>
-			<Name value="$modulename$" />
+			<Name value="CSharpScripting" />
 			<DLLName value="Int19h.Bannerlord.CSharp.Scripting.dll" />
 			<SubModuleClassType value="Int19h.Bannerlord.CSharp.Scripting.SubModule"/>
 			<Tags>
 				<Tag key="DedicatedServerType" value="none" />
 				<Tag key="IsNoRenderModeElement" value="false" />
 			</Tags>
-			<Tags />
 		</SubModule>
 	</SubModules>
 </Module>
