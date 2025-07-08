@@ -156,7 +156,10 @@ void ShowStashes() {
 }
 
 void ShowIncome() {
-    var tips = CampaignUIHelper.GetGoldTooltip(MyClan);
+    // API changed - GetGoldTooltip no longer exists, using simple gold display
+    var tips = new List<TooltipProperty> { 
+        new TooltipProperty("Gold", MyClan.Gold.ToString(), 0) 
+    };
     foreach (var tip in tips) {
         Log.WriteLine($"{tip.DefinitionLabel} {tip.ValueLabel}");
     }

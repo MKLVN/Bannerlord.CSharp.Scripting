@@ -76,10 +76,35 @@ namespace Int19h.Bannerlord.CSharp.Scripting {
                 throw new CommandException("Usage: csx.reset");
             }
 
+            // Log the reset command
+            try {
+                var logDir = "C:\\ProgramData\\Mount and Blade II Bannerlord\\logs";
+                if (!System.IO.Directory.Exists(logDir)) {
+                    System.IO.Directory.CreateDirectory(logDir);
+                }
+                System.IO.File.AppendAllText($"{logDir}\\csharp_scripting_commands.log", 
+                    $"[{System.DateTime.Now:yyyy-MM-dd HH:mm:ss}] Executing: csx.reset\n");
+            } catch { }
+
             var script = CSharpScript.Create("", Scripts.GetScriptOptions());
             Scripts.IgnoreVisibility(script);
             evalState = script.RunAsync().GetAwaiter().GetResult();
+            
+            // Clear the Shared object
+            var sharedField = typeof(ScriptGlobals).GetField("Shared", 
+                System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+            if (sharedField != null) {
+                sharedField.SetValue(null, new System.Dynamic.ExpandoObject());
+            }
+            
             output.Write("Script state reset.");
+            
+            // Log success
+            try {
+                var logDir = "C:\\ProgramData\\Mount and Blade II Bannerlord\\logs";
+                System.IO.File.AppendAllText($"{logDir}\\csharp_scripting_commands.log", 
+                    $"[{System.DateTime.Now:yyyy-MM-dd HH:mm:ss}] Success: Script state reset.\n");
+            } catch { }
         });
 
         [CommandLineFunctionality.CommandLineArgumentFunction("log_to", "csx")]
@@ -110,12 +135,35 @@ namespace Int19h.Bannerlord.CSharp.Scripting {
             }
 
             var code = ToCode(args);
-            using (ScriptGlobals.Log.WithWriter(output)) {
-                var script = evalState.Script.ContinueWith(code);
-                Scripts.IgnoreVisibility(script);
-                evalState = script.RunFromAsync(evalState).GetAwaiter().GetResult();
+            
+            // Safe logging function
+            void SafeLog(string message) {
+                try {
+                    var logDir = "C:\\ProgramData\\Mount and Blade II Bannerlord\\logs";
+                    if (!System.IO.Directory.Exists(logDir)) {
+                        System.IO.Directory.CreateDirectory(logDir);
+                    }
+                    System.IO.File.AppendAllText($"{logDir}\\csharp_scripting_commands.log", 
+                        $"[{System.DateTime.Now:yyyy-MM-dd HH:mm:ss}] {message}\n");
+                } catch {
+                    // Ignore logging errors to prevent breaking the command
+                }
             }
-            output.Write(evalState.ReturnValue);
+            
+            SafeLog($"Executing: {code}");
+            
+            try {
+                using (ScriptGlobals.Log.WithWriter(output)) {
+                    var script = evalState.Script.ContinueWith(code);
+                    Scripts.IgnoreVisibility(script);
+                    evalState = script.RunFromAsync(evalState).GetAwaiter().GetResult();
+                }
+                output.Write(evalState.ReturnValue);
+                SafeLog($"Success: {evalState.ReturnValue}");
+            } catch (Exception ex) {
+                SafeLog($"Error: {ex.Message}");
+                throw; // Re-throw to maintain original behavior
+            }
         }
 
         [CommandLineFunctionality.CommandLineArgumentFunction("eval", "csx")]
